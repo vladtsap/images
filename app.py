@@ -10,14 +10,18 @@ app = FastAPI(
     # redoc_url=None,
 )
 
+WEBSITE_PATH = 'http://localhost:8000'
+IMAGE_EXTENSIONS = ('jpg', 'jpeg', )
 
-@app.post("/upload-file/")
+
+@app.post('/upload-file/')
 async def upload_file(in_file: UploadFile = File(...)):
-    async with aiofiles.open(f'originals/{in_file.filename}', 'wb') as out_file:
+    filename = in_file.filename.lower()
+    async with aiofiles.open(f'originals/{filename}', 'wb') as out_file:
         content = await in_file.read()
         await out_file.write(content)
 
-    link_to_file = f'http://localhost:8000/{in_file.filename}'
+    link_to_file = f'{WEBSITE_PATH}/{filename}'
     return HTMLResponse(content=f"""
     <body>
         <a href="{link_to_file}" target="_blank">{link_to_file}</a>
@@ -25,8 +29,8 @@ async def upload_file(in_file: UploadFile = File(...)):
     """)
 
 
-@app.get("/")
-async def main():
+@app.get('/')
+async def upload_file_page():
     content = """
     <body>
         <form action="/upload-file/" enctype="multipart/form-data" method="post">
@@ -36,6 +40,23 @@ async def main():
     </body>
     """
     return HTMLResponse(content=content)
+
+
+@app.get('/images')
+async def images_list():
+    images = []
+    directory = Path('originals')
+
+    for extension in IMAGE_EXTENSIONS:
+        for image_path in directory.glob(f'*.{extension}'):
+            images.append(image_path.name)
+
+    page = "<body><h3>Images:</h3><ul>"
+    for image in images:
+        page += f"""<li><a href="{WEBSITE_PATH}/{image}" target="_blank">{image}</a></li>"""
+    page += "</ul></body>"
+
+    return HTMLResponse(content=page)
 
 
 @app.get('/{image_name}')
