@@ -1,14 +1,14 @@
 from mimetypes import guess_type
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import Response, FileResponse
+from fastapi.responses import Response
 from pathlib import Path
 
 from admin import router as admin_router
 
 app = FastAPI(
-    # docs_url=None,
-    # redoc_url=None,
+    docs_url=None,
+    redoc_url=None,
 )
 
 app.include_router(admin_router)
@@ -29,11 +29,7 @@ async def get_image(image_name: str):
     if not Path(filepath).is_file():
         raise HTTPException(status_code=404, detail='image not found')
 
-    return FileResponse(
-        path=f'originals/{image_name}',
+    return Response(
+        media_type=guess_type(filepath)[0],
+        headers={'X-Accel-Redirect': filepath},
     )
-
-    # return Response(
-    #     media_type=guess_type(filepath)[0],
-    #     headers={'X-Accel-Redirect': filepath},
-    # )
