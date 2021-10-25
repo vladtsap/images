@@ -1,24 +1,13 @@
 from mimetypes import guess_type
 
-from fastapi import FastAPI
-from fastapi.responses import FileResponse, Response
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response
+from pathlib import Path
 
 app = FastAPI(
     # docs_url=None,
     # redoc_url=None,
 )
-
-
-@app.get('/')
-async def index():
-    return {"message": "Hello World"}
-
-
-@app.get('/{image_name}')
-async def image_via_file(image_name: str):
-    return FileResponse(
-        path=f'originals/{image_name}',
-    )
 
 
 @app.get('/{image_name}')
@@ -32,6 +21,10 @@ async def image_via_header(image_name: str):
     """
 
     filepath = f'originals/{image_name}'
+
+    if not Path(filepath).is_file():
+        raise HTTPException(status_code=404, detail='image not found')
+
     return Response(
         media_type=guess_type(filepath)[0],
         headers={'X-Accel-Redirect': filepath},
