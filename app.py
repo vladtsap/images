@@ -1,65 +1,17 @@
 from mimetypes import guess_type
-from typing import List
 
-import aiofiles
-from fastapi import FastAPI, HTTPException, UploadFile, File
-from fastapi.responses import Response, FileResponse, HTMLResponse
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import Response, FileResponse
 from pathlib import Path
+
+from admin import router as admin_router
 
 app = FastAPI(
     # docs_url=None,
     # redoc_url=None,
 )
 
-WEBSITE_PATH = 'http://localhost:8000'
-IMAGE_EXTENSIONS = ('jpg', 'jpeg',)
-
-
-@app.post('/upload-file/')
-async def upload_files(in_files: List[UploadFile] = File(...)):
-    page = "<body>"
-
-    for in_file in in_files:
-        filename = in_file.filename.lower()
-        async with aiofiles.open(f'originals/{filename}', 'wb') as out_file:
-            content = await in_file.read()
-            await out_file.write(content)
-
-        link_to_file = f'{WEBSITE_PATH}/{filename}'
-        page += f"""<a href="{link_to_file}" target="_blank">{link_to_file}</a><br>"""
-
-    page += "</body>"
-    return HTMLResponse(content=page)
-
-
-@app.get('/')
-async def upload_files_page():
-    content = """
-    <body>
-        <form action="/upload-file/" enctype="multipart/form-data" method="post">
-            <input name="in_files" type="file" multiple>
-            <input type="submit">
-        </form>
-    </body>
-    """
-    return HTMLResponse(content=content)
-
-
-@app.get('/images')
-async def images_list():
-    images = []
-    directory = Path('originals')
-
-    for extension in IMAGE_EXTENSIONS:
-        for image_path in directory.glob(f'*.{extension}'):
-            images.append(image_path.name)
-
-    page = "<body><h3>Images:</h3><ul>"
-    for image in images:
-        page += f"""<li><a href="{WEBSITE_PATH}/{image}" target="_blank">{image}</a></li>"""
-    page += "</ul></body>"
-
-    return HTMLResponse(content=page)
+app.include_router(admin_router)
 
 
 @app.get('/{image_name}')
