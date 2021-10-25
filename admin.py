@@ -14,9 +14,9 @@ router = APIRouter(
 
 @router.get('/upload')
 async def page_for_uploading():
-    content = """
+    content = f"""
     <body>
-        <form action="/admin/upload-files" enctype="multipart/form-data" method="post">
+        <form action="{WEBSITE_PATH}/admin/upload-files" enctype="multipart/form-data" method="post">
             <input name="in_files" type="file" multiple>
             <input type="submit">
         </form>
