@@ -1,4 +1,5 @@
 from mimetypes import guess_type
+from typing import List
 
 import aiofiles
 from fastapi import FastAPI, HTTPException, UploadFile, File
@@ -11,30 +12,32 @@ app = FastAPI(
 )
 
 WEBSITE_PATH = 'http://localhost:8000'
-IMAGE_EXTENSIONS = ('jpg', 'jpeg', )
+IMAGE_EXTENSIONS = ('jpg', 'jpeg',)
 
 
 @app.post('/upload-file/')
-async def upload_file(in_file: UploadFile = File(...)):
-    filename = in_file.filename.lower()
-    async with aiofiles.open(f'originals/{filename}', 'wb') as out_file:
-        content = await in_file.read()
-        await out_file.write(content)
+async def upload_files(in_files: List[UploadFile] = File(...)):
+    page = "<body>"
 
-    link_to_file = f'{WEBSITE_PATH}/{filename}'
-    return HTMLResponse(content=f"""
-    <body>
-        <a href="{link_to_file}" target="_blank">{link_to_file}</a>
-    </body>
-    """)
+    for in_file in in_files:
+        filename = in_file.filename.lower()
+        async with aiofiles.open(f'originals/{filename}', 'wb') as out_file:
+            content = await in_file.read()
+            await out_file.write(content)
+
+        link_to_file = f'{WEBSITE_PATH}/{filename}'
+        page += f"""<a href="{link_to_file}" target="_blank">{link_to_file}</a><br>"""
+
+    page += "</body>"
+    return HTMLResponse(content=page)
 
 
 @app.get('/')
-async def upload_file_page():
+async def upload_files_page():
     content = """
     <body>
         <form action="/upload-file/" enctype="multipart/form-data" method="post">
-            <input name="in_file" type="file">
+            <input name="in_files" type="file" multiple>
             <input type="submit">
         </form>
     </body>
