@@ -1,13 +1,41 @@
 from mimetypes import guess_type
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import Response, FileResponse
+import aiofiles
+from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi.responses import Response, FileResponse, HTMLResponse
 from pathlib import Path
 
 app = FastAPI(
     # docs_url=None,
     # redoc_url=None,
 )
+
+
+@app.post("/upload-file/")
+async def upload_file(in_file: UploadFile = File(...)):
+    async with aiofiles.open(f'originals/{in_file.filename}', 'wb') as out_file:
+        content = await in_file.read()
+        await out_file.write(content)
+
+    link_to_file = f'http://localhost:8000/{in_file.filename}'
+    return HTMLResponse(content=f"""
+    <body>
+        <a href="{link_to_file}" target="_blank">{link_to_file}</a>
+    </body>
+    """)
+
+
+@app.get("/")
+async def main():
+    content = """
+    <body>
+        <form action="/upload-file/" enctype="multipart/form-data" method="post">
+            <input name="in_file" type="file">
+            <input type="submit">
+        </form>
+    </body>
+    """
+    return HTMLResponse(content=content)
 
 
 @app.get('/{image_name}')
