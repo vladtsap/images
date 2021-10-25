@@ -1,8 +1,5 @@
 version: '3.8'
 
-volumes:
-  originals-image:
-
 services:
   app:
     container_name: images
@@ -14,4 +11,4 @@ services:
     ports:
       - 8118:8000
     volumes:
-      - originals-image:/app/originals
+      - ./originals:/app/originals
