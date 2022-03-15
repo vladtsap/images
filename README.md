@@ -1,0 +1,17 @@
+## TODO
+- [ ] add index.html (link to repo)
+- [ ] check for duplicate while uploading
+- [ ] option to delete image
+- [ ] clear Cloudflare cache on image removing
+  - https://api.cloudflare.com/#zone-purge-files-by-url
+  - https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys
+- [ ] option to clear cache from one or all images
+- [ ] option to rename image
+- [ ] add cache-control to header
+- [ ] option for image resizing
+- [ ] beautify HTML pages
+  - https://fastapi.tiangolo.com/advanced/templates/
+  - https://getbootstrap.com/docs/5.1/forms/form-control/
+  - https://github.com/vas3k/i.vas3k.ru/tree/7ff16e05806bbdb211ecdf6fee79eabb39a8b6dc/templates
+- [ ] add script for getting backup of all images 
+- [ ] add README
